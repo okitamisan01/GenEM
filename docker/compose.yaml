@@ -1,0 +1,19 @@
+name: genem
+services:
+  genem:
+    image: genem-hsr:jazzy
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-LOCALHOST}
+      GENEM_API_KEY: ${GENEM_API_KEY:-}
+      GENEM_API_BASE: ${GENEM_API_BASE:-}
+      GENEM_MODEL: ${GENEM_MODEL:-}
+    volumes:
+      - ../ros2_ws/src:/root/colcon_ws/src
+      - ../logs:/root/genem_logs
+    stdin_open: true
+    tty: true
