@@ -32,8 +32,25 @@ def main(argv=None):
             instruction = instruction or 'Load supplied behavior'
             plan = parse_behavior(args.behavior_file.read_text(encoding='utf-8'))
         else:
-            instruction = instruction or input('Instruction:\n> ')
-            plan = generator.generate(instruction)
+            if interactive:
+                if args.backend == 'offline':
+                    print('Offline demo (rule-based). Examples: hello, Nod., Shake your head., '
+                          'Become attentive., Acknowledge the person., Pay attention to the person.')
+                while True:
+                    instruction = input('Instruction (quit to exit):\n> ').strip()
+                    if instruction.lower() in ('quit', 'exit'):
+                        return 0
+                    try:
+                        plan = generator.generate(instruction)
+                        break
+                    except BehaviorError as exc:
+                        if args.backend != 'offline':
+                            raise
+                        print(f'Unsupported input: {exc}')
+                        print('Try: hello, Nod., Shake your head., Become attentive., '
+                              'Acknowledge the person., or Pay attention to the person.')
+            else:
+                plan = generator.generate(instruction)
         print(f'Backend: {args.backend}; adapter: MOCK (no physical motion)')
         while True:
             print('Generated behavior:\n' + json.dumps(plan, indent=2))

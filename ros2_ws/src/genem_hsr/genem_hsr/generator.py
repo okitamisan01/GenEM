@@ -33,12 +33,12 @@ class OfflineGenerator(BehaviorGenerator):
         if previous is not None:
             plan = validate_behavior(previous)
         else:
-            text = instruction.lower()
+            text = instruction.strip().lower()
             nod = step('head_nod', amplitude=0.15, speed=0.5, repetitions=1)
             gaze = step('look_at', target='person')
             if 'shake' in text:
                 sequence = [step('head_shake', amplitude=0.15, speed=0.5, repetitions=1)]
-            elif 'acknowledge' in text:
+            elif 'acknowledge' in text or text.rstrip('!.') in ('hello', 'hi', 'hey'):
                 sequence = [gaze, nod]
             elif 'attention' in text:
                 sequence = [gaze, step('wait', duration=2.0)]

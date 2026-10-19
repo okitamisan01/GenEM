@@ -49,7 +49,9 @@ source install/setup.bash
 ros2 run genem_demo interactive_demo --mock
 ```
 
-指示例: `Acknowledge the person.`。表示された行動を `y` でMock実行し、
+指示例: `hello` または `Acknowledge the person.`。`hello` / `hi` / `hey` は注視とうなずきに変換します。
+未対応の入力は例を表示して再入力を促します。`quit` / `exit` で終了できます。
+表示された行動を `y` でMock実行し、
 `Make it slower and friendlier.` で修正できます。空のフィードバックで終了します。
 ROS通信範囲は初期状態ではLOCALHOST、CPUのみです。
 [Docker詳細・GPU・ネットワーク](docs/docker_setup.md)を参照してください。

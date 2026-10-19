@@ -71,3 +71,13 @@ Branch: `feature/genem-prototype`. No merge to main is performed.
 TeamSOBITS and existing HSR checkouts were read-only references.
 For the final push result, compare the remote feature branch to the local HEAD;
 this file does not treat a planned push as a completed push.
+
+## Interactive-input regression update
+
+The offline CLI now lists supported inputs, retries unsupported interactive instructions,
+and accepts hello/hi/hey as acknowledgement aliases. `quit`/`exit` ends instruction input.
+Host pytest and Compose-mounted colcon tests: **58 passed, 0 failures**.
+A piped `h8 → hello → y → empty feedback` session was verified through
+`ros2 run genem_demo interactive_demo --mock`: the invalid input produced no action,
+and the greeting produced look_at followed by head_nod. Unsupported noninteractive
+instructions still return status 2 for script error detection.
