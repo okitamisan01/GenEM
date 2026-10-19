@@ -1,0 +1,15 @@
+{
+  "behavior": {
+    "name": "Shake your head.",
+    "sequence": [
+      {
+        "skill": "head_shake",
+        "parameters": {
+          "amplitude": 0.15,
+          "speed": 0.5,
+          "repetitions": 1
+        }
+      }
+    ]
+  }
+}

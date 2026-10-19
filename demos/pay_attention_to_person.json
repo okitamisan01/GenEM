@@ -1,0 +1,19 @@
+{
+  "behavior": {
+    "name": "Pay attention to the person.",
+    "sequence": [
+      {
+        "skill": "look_at",
+        "parameters": {
+          "target": "person"
+        }
+      },
+      {
+        "skill": "wait",
+        "parameters": {
+          "duration": 2.0
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "behavior": {
+    "name": "Acknowledge the person.",
+    "sequence": [
+      {
+        "skill": "look_at",
+        "parameters": {
+          "target": "person"
+        }
+      },
+      {
+        "skill": "head_nod",
+        "parameters": {
+          "amplitude": 0.15,
+          "speed": 0.5,
+          "repetitions": 1
+        }
+      }
+    ]
+  }
+}
