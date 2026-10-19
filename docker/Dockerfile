@@ -1,5 +1,5 @@
-FROM ros:jazzy-ros-base-noble
-ENV DEBIAN_FRONTEND=noninteractive
+FROM ros:jazzy-ros-base-noble@sha256:103b6c417973394659af6804d4917cd489b91e5ed22eb7bef263025a3bed2410
+ENV DEBIAN_FRONTEND=noninteractive PYTHONDONTWRITEBYTECODE=1
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-colcon-common-extensions python3-rosdep python3-pytest \
     python3-yaml python3-requests \

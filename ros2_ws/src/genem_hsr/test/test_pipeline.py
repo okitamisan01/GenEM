@@ -35,7 +35,7 @@ def test_oversize_and_depth():
             parse_behavior(text)
 
 
-@pytest.mark.parametrize('value', [-1, 0, 0.31, float('nan'), float('inf'), True, '0.1', None])
+@pytest.mark.parametrize('value', [-1, 0, 0.31, float('nan'), float('inf'), 10**500, True, '0.1', None])
 def test_bad_amplitude(value):
     plan = nod()
     plan['behavior']['sequence'][0]['parameters']['amplitude'] = value

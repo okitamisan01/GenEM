@@ -102,9 +102,9 @@ def validate_behavior(value):
                 if not isinstance(val, str) or val not in rule:
                     raise BehaviorError('Unknown mock gaze target')
             else:
-                if type(val) not in (int, float) or not math.isfinite(val):
+                if type(val) not in (int, float):
                     raise BehaviorError(f'{key} must be a finite number')
-                if not rule[0] <= val <= rule[1]:
+                if not rule[0] <= val <= rule[1] or not math.isfinite(val):
                     raise BehaviorError(f'{key} outside mock range {rule}')
                 if key == 'repetitions' and type(val) is not int:
                     raise BehaviorError('repetitions must be an integer')
