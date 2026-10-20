@@ -105,3 +105,14 @@ joint_trajectory_controller, joint_state_broadcaster and robot_state_publisher.
 The package includes an original two-joint test URDF and launch file. It is not a
 copy of the HSR model and does not provide full-body physics or camera rendering.
 The full TeamSOBITS simulator runs in its own separately prepared ROS environment.
+
+## Optional physical HSR104 client
+
+`docker/compose.hsr104.yaml` selects a separate `genem-hsr:humble` image, pinned to
+`ros:humble-ros-base-jammy@sha256:566b87e6dfc48392189a9c32e594e84060fa9948de93b04e536f39475a1f6963`.
+The shared Dockerfile/entrypoint parameterizes the distribution. Default builds still
+use pinned Noble/Jazzy; physical HSR104 clients use Jammy/Humble (Python 3.10).
+Cyclone DDS is installed in both images. `docker/hsr104.sh` uses a separate Compose
+project and explicit local settings; it never modifies the existing human_concept
+container. Device IP/interface/XML settings stay out of Git and build contexts.
+See [HSR104 setup](hsr104_setup.md).

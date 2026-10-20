@@ -105,3 +105,31 @@ This is a minimal two-joint controller integration rig. Full TeamSOBITS Gazebo H
 physical HSR, collision safety and remote robot networking remain untested. No real
 robot actuation was attempted. Live APIs, GPU and another PC remain untested.
 The earlier 55/58-test records above are historical; the current suite has 77 tests.
+
+## HSR104 startup checklist adaptation
+
+The user supplied an HSR104 startup checklist identifying a Humble robot and a
+Jazzy human_concept client using Cyclone DDS/domain 104. A separate matched Humble
+GenEM client was added rather than assuming all Jazzy controller-manager messages
+are wire-compatible. Existing human_concept software and HSR startup were unchanged.
+
+| Check | Observed result |
+|---|---|
+| Host pytest | 83 passed (77 ROS package tests + 6 local preparation tests) |
+| Humble / Jammy image | builds; both ROS packages compile |
+| Humble + Cyclone DDS | 77 colcon tests pass; real-controller trajectory/state/cancellation/CLI integration passes |
+| Jazzy / Noble image | builds; 77 colcon tests pass; Cyclone DDS trajectory/state/cancellation/CLI integration passes |
+| Generated DDS configuration | loaded in both middleware versions with loopback interface and peer only |
+| Invalid DDS XML | probe returns status 2 with a useful initialization error and no motion goal |
+| Deployment settings | generated only in Git/Docker-ignored local files, verified=false |
+| Physical HSR104 | no connection, SSH, robot launch, torque activation or actuator commands performed |
+
+The Humble test rig needed the controller's private robot_description subscription
+remapped to /robot_description. The watchdog test now accepts either timestamp-stale
+or missing-stream detection, because both legitimately detect the same disabled
+broadcaster; confirmed cancellation is still required.
+
+Tests ran in network-isolated containers on domain 91, never the real deployment
+network/domain 104. They do not validate Humble↔Jazzy cross-distribution traffic or
+resolve the checklist's camera DDS/serdata error. Actual HSR104 package versions,
+limits, network connectivity and on-site supervised motion remain unverified.

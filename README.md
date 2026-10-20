@@ -121,6 +121,11 @@ PYTHONPATH=ros2_ws/src/genem_hsr:ros2_ws/src/genem_demo \
 
 ## HSR・シミュレーター接続
 
+**HSR104がHumbleの場合：** [HSR104接続手順](docs/hsr104_setup.md)を使用してください。
+既存のJazzy環境を残し、`docker/hsr104.sh` でHumble＋Cyclone DDSの専用クライアントを起動できます。
+ユーザーの起動チェックリストに合わせた設定はローカルファイルへ生成し、Gitに含めません。
+
+
 [HSR接続手順](docs/hsr_integration.md)に、ロボットなしの検証、TeamSOBITS Gazebo、実機の順で説明しています。
 まず動作命令を送らない接続確認を実行します。
 

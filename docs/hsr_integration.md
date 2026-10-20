@@ -97,6 +97,13 @@ and change controller_manager/controller/joint_states accordingly.
 
 ## 4. Connect a physical ROS 2 HSR
 
+**HSR104 deployment update:** the supplied startup checklist identifies Humble on
+HSR104 and Cyclone DDS/domain 104 on the client. Use the dedicated
+[HSR104 Humble client guide](hsr104_setup.md), preserving the existing Jazzy workspace.
+Do not assume Jazzy controller-manager messages match Humble just because the
+trajectory Action name is the same.
+
+
 ROS 2 was confirmed by the user. The exact robot distribution, namespaces and
 calibration still need on-site verification. Connecting the network alone is not a
 substitute for those checks. The deployed controller must expose compatible ROS 2
