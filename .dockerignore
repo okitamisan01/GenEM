@@ -11,3 +11,5 @@ logs
 *.tar
 
 config/*.local.yaml
+
+.venv

@@ -118,7 +118,7 @@ def test_feedback_over_limit_rejected():
         OfflineGenerator().generate('Nod', plan, 'more enthusiastic')
 
 
-def test_hsr_disabled_even_with_confirmation():
+def test_unconfigured_hsr_disabled_even_with_confirmation():
     with pytest.raises(HardwareDisabledError):
         HSRRobotSkillInterface()
     adapter = object.__new__(HSRRobotSkillInterface)

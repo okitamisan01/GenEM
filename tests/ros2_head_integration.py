@@ -20,6 +20,13 @@ try:
             if time.monotonic() >= deadline:
                 raise
     print('Read-only probe:', json.dumps(report))
+    import subprocess
+    probe = subprocess.run(['ros2', 'run', 'genem_hsr', 'hsr_probe', '--profile',
+                            '/opt/genem/config/hsr_test_rig.yaml'],
+                           capture_output=True, text=True, timeout=20)
+    assert probe.returncode == 0, probe.stdout + probe.stderr
+    assert 'No motion goal sent' in probe.stdout
+    print('PASS: installed read-only hsr_probe command.')
     plan = {'behavior': {'name': 'head integration', 'sequence': [
         step('look_at', target='person'),
         step('head_nod', amplitude=0.04, speed=0.2, repetitions=1),
