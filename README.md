@@ -2,7 +2,8 @@
 
 自然言語 → 構造化行動 → 検証 → Skill API → Mock の研究用プロトタイプです。
 Ubuntu 24.04 / Python 3.12 / ROS 2 Jazzy を独立したDocker構成で提供します。
-**HSR実機の制御は未実装・無効です。** `--hsr` は常に終了コード2で拒否します。
+**ROS 2 HSR頭部用Actionアダプターを実装しました。** 実機は検証済みローカル設定と毎回の明示確認が必要です。
+標準コントローラー＋二関節検証機構で動作・キャンセルを確認済み。実機とGazebo HSR全身は未検証です。
 
 [GenEM原研究](https://generative-expressive-motion.github.io/)を参考にした独自実装です。
 原著者のコード・実験結果の再現を主張しません。
@@ -20,7 +21,7 @@ Strict parser + bounds/duration validator
         ↓ (execution revalidates the whole plan)
 BehaviorExecutor → RobotSkillInterface
                          ├─ Mock: ordered event log
-                         └─ HSR: disabled integration scaffold
+                         └─ ROS 2 HSR / simulator: head trajectory Action
 ```
 
 `genem_hsr` に生成・検証・実行・履歴・Skill APIを、`genem_demo` にCLIを配置しています。
@@ -68,7 +69,7 @@ ros2 run genem_demo interactive_demo --mock --scenario acknowledge_person \
   --feedback 'Make it slower and friendlier.' --yes
 ```
 
-`--yes` はMockの確認省略のみです。`--hsr` を有効化しません。
+`--yes` はMockの確認省略のみです。ROS経由の実行には使えません。
 Mockは関節を動かさず、待機や音声・人物注視もイベント記録のみです。
 入力ファイル例は `demos/*.json`。`--behavior-file /path/to/behavior.json` で読み込めます。
 コンテナの履歴 `~/genem_logs/history.jsonl` はホストの `logs/` に保存され、Git対象外です。
@@ -118,12 +119,28 @@ PYTHONPATH=ros2_ws/src/genem_hsr:ros2_ws/src/genem_demo \
 
 検証結果と実行条件は[検証記録](docs/validation.md)。
 
-## HSR接続
+## HSR・シミュレーター接続
 
-[HSR統合調査とTODO](docs/hsr_integration.md)に既存ROS 2コードの根拠を記載しています。
-実機のROS世代、名前空間、制限値、現在姿勢、停止処理、監督と非常停止手段の確認が必要です。
-この版はロボット用Publisher/Action Clientを作成せず、動作命令を送りません。
-Mockの角度・速度制限は実機の安全性を保証しません。
+[HSR接続手順](docs/hsr_integration.md)に、ロボットなしの検証、TeamSOBITS Gazebo、実機の順で説明しています。
+まず動作命令を送らない接続確認を実行します。
+
+```bash
+# 二関節の検証機構を別ターミナルで起動
+bash docker/exec.sh ros2 launch genem_hsr head_test_rig.launch.py
+# 接続確認のみ
+bash docker/exec.sh ros2 run genem_hsr hsr_probe \
+  --profile /root/genem_config/hsr_test_rig.yaml
+# 軌道をプレビューし、EXECUTE入力でうなずきを実行
+bash docker/exec.sh ros2 run genem_demo interactive_demo --sim \
+  --profile /root/genem_config/hsr_test_rig.yaml --scenario nod
+```
+
+実機は `config/hsr_hardware.example.yaml` を `config/hsr.local.yaml` にコピーして、
+機体・制限・制御先を確認後に設定します。`verified: false` の間は動作しません。
+ROS 2通信のドメインとネットワーク設定を合わせ、`hsr_probe`で確認してから
+`--hsr --profile /root/genem_config/hsr.local.yaml --scenario nod` を使います。
+ROS経由では `--yes` を禁止し、毎回 `EXECUTE` を入力します。
+人物注視は手動指定の方向のみ、音声・台車・腕の制御は未対応です。
 
 ## 移植・既知の制約・今後
 
@@ -138,9 +155,9 @@ tarやAPIキーをCommitしないでください。ネットワークなしの�
 保存済みイメージを使えます。初回ビルドには外部レジストリとapt/rosdepへの接続が必要です。
 ベースイメージはdigest固定ですが、apt依存の完全なバイト一致は保証しません。
 
-未実装: 実機制御・人物検出追跡・音声合成・台車制御・学習済みSkillの自動追加・
+未実装: 人物検出追跡・音声合成・台車／腕制御・学習済みSkillの自動追加・
 原論文の複数段階推論とフィードバック振り分け・人による表出性評価。
-今後は検証済みHSRプロファイル、シミュレーター、長期HRIと個人化を追加します。
+HSR実機の設定確認と試験、Gazebo HSR全身での動作確認、長期HRIと個人化は今後の課題です。
 [英語ミーティング資料](docs/implementation_summary.md)も用意しています。
 
 開発・Push先は `okitamisan01/GenEM` の `feature/genem-prototype` のみです。

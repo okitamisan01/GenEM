@@ -41,3 +41,11 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
+
+## HSR ROS 2 integration references
+
+The TeamSOBITS/hsrb_simulator Jazzy branch at
+`a4eca087da629b8448fbc2a9adb3227e274f8288` was cloned into a temporary directory
+for source/README inspection. No source or patches from it were vendored, modified
+or pushed. The two-joint test URDF/configuration and trajectory compiler are newly
+written here; ros2_control/control_msgs packages remain under their upstream licenses.

@@ -37,7 +37,7 @@ docker run --rm --network none genem-hsr:jazzy \
   ros2 run genem_demo interactive_demo --mock --scenario nod --yes
 ```
 
-Compose mounts only repository `ros2_ws/src` and `logs`; build/install remain in the
+Compose mounts only repository `ros2_ws/src` , `config` (read-only) and `logs`; build/install remain in the
 container and are recreated by an image build. After source changes, run colcon build
 inside the container. Rebuilding/recreating is required for package metadata/dependency
 changes. `exec.sh` sources both ROS and the workspace for commands and interactive shells.
@@ -58,8 +58,7 @@ this file; no shell sourcing of user-controlled .env is needed. Never commit it.
 `ROS_DOMAIN_ID=42` and `ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST` are defaults.
 Host networking targets Linux Docker Engine; Docker Desktop behavior differs and is untested.
 For a future verified ROS 2 HSR deployment, select the matching domain/RMW and explicitly
-set discovery range to `SUBNET`, check firewall/multicast and namespaces. This does not
-activate hardware support. No robot addresses are hardcoded.
+set discovery range to `SUBNET`, check firewall/multicast and namespaces. Hardware support additionally requires a reviewed local profile and per-plan confirmation. No robot addresses are hardcoded.
 For ROS 1 robots, host networking alone does not bridge message types or actions.
 
 ## Optional GPU
@@ -98,3 +97,11 @@ docker load -i genem_hsr.tar
 A different architecture needs its own build/compatible multi-platform image. Do not
 add image archives to Git. Initial online builds require registry, Ubuntu/ROS apt and
 rosdep access. Only Mock execution after building is verified without networking.
+
+## ROS 2 head client dependencies
+
+The client image now includes control_msgs, controller_manager/ros2_control,
+joint_trajectory_controller, joint_state_broadcaster and robot_state_publisher.
+The package includes an original two-joint test URDF and launch file. It is not a
+copy of the HSR model and does not provide full-body physics or camera rendering.
+The full TeamSOBITS simulator runs in its own separately prepared ROS environment.

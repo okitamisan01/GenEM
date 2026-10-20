@@ -42,4 +42,4 @@ There is no generated Python execution, original multi-module prompt replication
 learned-skill library, feedback router, or reproduction of human-subject results.
 The previous behavior and user feedback are supplied to each API revision and
 saved as provenance. The name “GenEM-inspired” refers to this conceptual workflow.
-The implementation's safety constraints and HSR integration scaffold are local design choices.
+The implementation's safety constraints and ROS 2 HSR head adapter are local design choices.

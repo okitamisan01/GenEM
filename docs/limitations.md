@@ -1,38 +1,40 @@
 # Scope and limitations
 
-| Category | Status |
+| Area | Current status |
 |---|---|
-| Inspired by GenEM | language-to-parameterized skills, composing primitive sequences, language feedback revisions |
-| Newly implemented for this project | JSON/YAML grammar, strict validator, mock Skill API, offline fixtures, generic API backend, JSONL provenance, Jazzy Docker packaging, disabled HSR boundary |
-| Implemented and verified | CPU Docker build; two ament_python packages; parser/validator/executor/backend tests; five Mock scenarios and feedback loop |
-| Implemented but not verified against external systems | live LLM provider integration; optional GPU device exposure; second physical PC workflow |
-| Not implemented | working HSR motion adapter, physical robot communication, real speech/perception, base control, collision checking, original staged LLM architecture and feedback router, learned-skill library, user studies |
+| GenEM-inspired workflow | language-to-parameterized skills and iterative feedback; independent implementation |
+| Mock | six skills, five scenarios, greeting aliases, validation and JSONL history verified |
+| ROS 2 head adapter | implemented using FollowJointTrajectory; current-state preflight, bounded cubic waypoint compilation, per-plan confirmation, result checking and cancellation |
+| Controller integration | real Jazzy JTC + two-joint GenericSystem tested; streamed excursions and final positions checked; loss of broadcaster triggered confirmed cancellation |
+| Physical HSR | no actuation attempted; robot-specific reviewed profile and on-site commissioning still required |
+| Full TeamSOBITS Gazebo HSR | Jazzy source inspected and connection profile provided; not built or run here |
+| Live LLM / GPU / second PC | not tested |
+| Perception, real speech, base/arms | not implemented; ROS speech steps reject the whole plan |
 
-The HSR class is a scaffold that raises before communication; its presence must not
-be reported as successful HSR control. Source limits are not accepted hardware limits.
-The mock policy constrains independent logical steps, not real joint trajectories,
-acceleration, collision clearance, gaze transforms or timing. Mock completes immediately.
+Mock estimates and hardware trajectory budgets differ. ROS motion is time-scaled
+to the reviewed profile velocity/acceleration bounds and checked again as a whole.
+These are command-space checks, not guarantees of collision clearance, physical
+acceleration tracking or safety certification. The probe needs both position and
+velocity feedback; deployments not providing them must be adapted and verified first.
 
-Offline generation is a deterministic fixture selector with limited English keywords;
-it does not understand arbitrary requests or represent LLM performance. Unsupported
-feedback is an error. Repeated enthusiastic/slower feedback may hit policy bounds
-and will be rejected rather than silently adjusted.
+Simulator mode checks for a recognized fake/Gazebo head hardware plugin to reduce
+misrouting to a physical robot. Hardware mode still depends on a laboratory-reviewed
+profile; the repository example deliberately remains unverified. ROS 2 alone does
+not guarantee controller-manager compatibility across distributions or proprietary stacks.
 
-API transport tests use fake keys and injected responses. No external provider/model
-was selected or charged. The single-call backend does not reproduce the original
-multi-stage architecture. There is no claim of equivalent behavioral quality.
-Responses must contain plain JSON/YAML; fenced Markdown and arbitrary programs are refused.
-A read timeout is not an overall generation deadline; provider-specific rate-limit,
-streaming and cancellation logic remains future work.
+A current-state check cannot guarantee exclusive controller ownership. Do not run
+another head-command client concurrently. Software cancellation may fail during
+communication loss; a supervised independent emergency stop remains necessary.
 
-History is intended for a single CLI process. It contains user language and generated
-behaviors, so keep it local as appropriate; no concurrent-writer lock, encryption,
-identity tracking or experiment consent workflow is included.
+`look_at(person)` is a named direction, not tracked perception. The simulator preset
+uses the known forward demo direction; the physical template has no person target.
+`look_direction` uses absolute joint pan/tilt, not Cartesian gaze coordinates.
 
-The Docker base digest is pinned, but apt/rosdep dependencies are not snapshot-locked.
-Validated host/image architecture is amd64. Other architectures, Docker Desktop,
-GPU, actual robot networking and another PC were not tested.
+The default generator is deterministic and supports a small English vocabulary.
+API calls are mocked in tests. No original multi-stage GenEM prompt pipeline,
+learned-skill library, feedback router or human-subject evaluation is reproduced.
+History is single-process local JSONL, with no database or concurrent-writer lock.
 
-Future work: verified HSR adapter/simulator tests; staged planner comparisons;
-persistent user preferences and person grounding; versioned learned skills;
-longitudinal HRI evaluation with consent and a reproducible human-feedback protocol.
+The Docker base is pinned; apt/rosdep repositories are not snapshot-locked. Linux
+amd64 was tested; other architectures, Docker Desktop and GPU were not. Full Gazebo
+HSR dependencies are intentionally separate from the lightweight client/test image.

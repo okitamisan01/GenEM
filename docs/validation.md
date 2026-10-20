@@ -61,7 +61,7 @@ committed. Tests confirm logical Mock execution, not actual timing or expression
 |---|---|---|
 | 1: Research/environment | repository identities checked; official paper/appendices and local SOBITS configuration investigated; independent Noble/Jazzy image builds | dependency snapshots and other architectures |
 | 2: Mock prototype | strict grammar, six skills, two backends, ordered execution, five demos, feedback/history, tests | live-provider compatibility and richer planning |
-| 3: HSR integration | source evidence documented; interface scaffold refuses hardware | verified robot contract, working adapter, simulation and supervised hardware testing |
+| 3: HSR integration | ROS 2 head Action adapter implemented; real JTC + simulated two-joint hardware verified | full Gazebo HSR and supervised physical robot commissioning |
 | 4: Reproducibility/materials | build/run/test scripts, English discussion notes and documentation | second-PC verification; merge to main remains unauthorized |
 
 ## Git scope
@@ -81,3 +81,27 @@ A piped `h8 → hello → y → empty feedback` session was verified through
 `ros2 run genem_demo interactive_demo --mock`: the invalid input produced no action,
 and the greeting produced look_at followed by head_nod. Unsupported noninteractive
 instructions still return status 2 for script error detection.
+
+## ROS 2 HSR head extension
+
+The robot was identified as ROS 2 by the user. The TeamSOBITS Jazzy simulator
+revision `a4eca087da629b8448fbc2a9adb3227e274f8288` was inspected read-only.
+The subsequent head-adapter milestone was verified as follows:
+
+| Check | Observed result |
+|---|---|
+| Host unit tests | 77 passed |
+| Final Docker build | succeeds with ROS control dependencies, launch/config and tests |
+| Image colcon build | 2 packages finished |
+| Image colcon test-result | 77 tests, 0 errors, 0 failures, 0 skipped |
+| Real-controller integration | FollowJointTrajectory completed on Jazzy JTC + GenericSystem; both pan and tilt traversed positive/negative excursions; final [0.1, -0.08] verified |
+| Lost state feedback | deactivated the actual joint_state_broadcaster during execution; watchdog canceled the goal and confirmed terminal state |
+| CLI ROS path | EXECUTE input caused motion; history recorded hsr_simulator, not mock |
+| Confirmation gates | missing/unverified hardware profile refused; --yes refused for all ROS motion; simulator checks recognized fake/Gazebo head plugin |
+| Isolation | all motion integration tests ran in --network none container, domain 91 |
+
+Reproduce with `bash tests/verify_ros2_head.sh` after building the image.
+This is a minimal two-joint controller integration rig. Full TeamSOBITS Gazebo HSR,
+physical HSR, collision safety and remote robot networking remain untested. No real
+robot actuation was attempted. Live APIs, GPU and another PC remain untested.
+The earlier 55/58-test records above are historical; the current suite has 77 tests.

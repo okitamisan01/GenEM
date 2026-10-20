@@ -28,7 +28,7 @@ flowchart LR
     D --> E[Executor]
     E --> F[Skill API]
     F --> G[Mock]
-    F --> H[HSR: disabled scaffold]
+    F --> H[HSR: profile-gated head Action]
 ```
 
 ## 5. Docker Environment
@@ -50,9 +50,9 @@ generation or revision. It does not yet learn or register new skills automatical
 ## 7. HSR Skill API
 
 The robot-independent vocabulary includes nod, shake, look direction, symbolic gaze,
-wait and speech. All are implemented as Mock events. Existing HSR ROS 2 source
+wait and speech. All are implemented as Mock events. Head/gaze/wait also have a ROS 2 Action adapter. Existing HSR ROS 2 source
 confirms pan/tilt joint names, but the deployed robot's interfaces, limits and Jazzy
-compatibility remain unverified. Physical execution therefore always fails closed.
+compatibility remain unverified. Physical motion requires a reviewed profile and explicit per-plan confirmation; the actual HSR remains untested.
 
 ## 8. Iterative Feedback
 
@@ -70,7 +70,7 @@ These checks establish software behavior, not expressive quality or physical saf
 
 ## 10. Limitations
 
-No physical HSR communication, real target grounding or speech synthesis is present.
+The ROS 2 head Action path is implemented and tested against a real controller with simulated hardware. No physical HSR or full Gazebo HSR was tested; real target grounding and speech synthesis remain absent.
 Live API calls, GPU execution and migration to a second PC remain unverified.
 Mock parameters are not certified robot limits. No human-subject evaluation was conducted.
 
@@ -84,3 +84,12 @@ preferences and adaptation across repeated interactions.
 Discussion questions: Which behavioral qualities should be evaluated? How should
 feedback be aggregated over time? Which HSR software version and safety procedures
 should define the first physical deployment?
+
+## ROS 2 integration update
+
+A real Jazzy JointTrajectoryController accepted and completed the generated head
+trajectory on a two-joint GenericSystem. Joint-state excursions and final positions
+were observed. Stopping the actual state broadcaster during execution triggered
+confirmed Action cancellation. A read-only probe and deployment profiles support
+on-site commissioning. This test does not establish physical safety or full HSR
+simulator compatibility. See [connection guide](hsr_integration.md).
