@@ -38,3 +38,8 @@ def test_interactive_quit_after_unknown(monkeypatch, tmp_path):
 def test_noninteractive_unknown_still_fails(tmp_path):
     assert main(['--instruction', 'h8', '--yes',
                  '--log', str(tmp_path / 'history.jsonl')]) == 2
+
+
+def test_cli_ros_motion_never_accepts_yes(capsys):
+    assert main(['--sim', '--yes', '--scenario', 'nod']) == 2
+    assert '--yes is forbidden' in capsys.readouterr().out

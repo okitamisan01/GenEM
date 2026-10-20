@@ -9,3 +9,5 @@ ros2_ws/log
 **/.env
 logs
 *.tar
+
+config/*.local.yaml

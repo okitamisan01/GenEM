@@ -9,11 +9,27 @@ from genem_hsr.history import record_history
 from genem_hsr.skills import MockRobotSkillInterface, HSRRobotSkillInterface, HardwareDisabledError
 
 
+def confirm_and_execute(plan, adapter, args):
+    if isinstance(adapter, HSRRobotSkillInterface):
+        print('ROS motion preflight: ' + json.dumps(adapter.prepare(plan), indent=2))
+        print('Confirm the target, clear the head workspace and keep emergency stop available.')
+        execute = input('Type EXECUTE to send this trajectory (anything else cancels): ').strip() == 'EXECUTE'
+        if execute:
+            BehaviorExecutor(adapter).execute(plan, hardware_confirmed=True)
+        return execute
+    execute = args.yes or input('Execute MOCK? [y/N] ').strip().lower() == 'y'
+    if execute:
+        BehaviorExecutor(adapter).execute(plan)
+    return execute
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description='GenEM-inspired mock behavior demo')
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument('--mock', action='store_true', help='default: record mock actions only')
-    mode.add_argument('--hsr', action='store_true', help='disabled until hardware integration is verified')
+    mode.add_argument('--hsr', action='store_true', help='ROS 2 HSR head motion; requires operator-verified profile')
+    mode.add_argument('--sim', action='store_true', help='ROS 2 simulator head Action')
+    parser.add_argument('--profile', type=Path, help='YAML robot/simulator profile')
     parser.add_argument('--backend', choices=['offline', 'api'], default='offline')
     parser.add_argument('--scenario', choices=list(SCENARIOS))
     parser.add_argument('--instruction')
@@ -22,9 +38,16 @@ def main(argv=None):
     parser.add_argument('--yes', action='store_true', help='execute in mock without prompting')
     parser.add_argument('--log', type=Path, default=Path.home() / 'genem_logs' / 'history.jsonl')
     args = parser.parse_args(argv)
+    adapter = None
     try:
-        # Hardware disabled before any generation, API call, or input.
-        adapter = HSRRobotSkillInterface() if args.hsr else MockRobotSkillInterface()
+        if (args.hsr or args.sim) and args.yes:
+            raise HardwareDisabledError('HSR execution disabled: --yes is forbidden for all ROS motion')
+        if args.hsr or args.sim:
+            adapter = HSRRobotSkillInterface(args.profile, mode='hardware' if args.hsr else 'simulator')
+            adapter_name = 'hsr_' + adapter.profile.environment
+        else:
+            adapter = MockRobotSkillInterface()
+            adapter_name = 'mock'
         generator = APIBehaviorGenerator() if args.backend == 'api' else OfflineGenerator()
         interactive = not (args.instruction or args.scenario or args.behavior_file)
         instruction = args.instruction or SCENARIOS.get(args.scenario)
@@ -51,29 +74,25 @@ def main(argv=None):
                               'Acknowledge the person., or Pay attention to the person.')
             else:
                 plan = generator.generate(instruction)
-        print(f'Backend: {args.backend}; adapter: MOCK (no physical motion)')
+        print(f'Backend: {args.backend}; adapter: {adapter_name}')
         while True:
             print('Generated behavior:\n' + json.dumps(plan, indent=2))
-            execute = args.yes or input('Execute MOCK? [y/N] ').strip().lower() == 'y'
-            if execute:
-                BehaviorExecutor(adapter).execute(plan)
+            execute = confirm_and_execute(plan, adapter, args)
             feedback = args.feedback
             if feedback is None and interactive:
                 feedback = input('Feedback (empty to finish):\n> ').strip()
             if not feedback:
-                record_history(args.log, instruction, plan, executed=execute, backend=args.backend)
+                record_history(args.log, instruction, plan, executed=execute, backend=args.backend, adapter=adapter_name)
                 break
             updated = generator.generate(instruction, previous=plan, feedback=feedback)
             record_history(args.log, instruction, plan, feedback, updated,
-                           executed=execute, backend=args.backend)
+                           executed=execute, backend=args.backend, adapter=adapter_name)
             plan = updated
             args.feedback = None
             if not interactive:
                 print('Updated behavior:\n' + json.dumps(plan, indent=2))
-                update_execute = args.yes or input('Execute updated MOCK? [y/N] ').strip().lower() == 'y'
-                if update_execute:
-                    BehaviorExecutor(adapter).execute(plan)
-                record_history(args.log, instruction, plan, executed=update_execute, backend=args.backend)
+                update_execute = confirm_and_execute(plan, adapter, args)
+                record_history(args.log, instruction, plan, executed=update_execute, backend=args.backend, adapter=adapter_name)
                 break
         return 0
     except (BehaviorError, HardwareDisabledError, OSError) as exc:
@@ -82,6 +101,9 @@ def main(argv=None):
     except (EOFError, KeyboardInterrupt):
         print('\nDemo stopped.')
         return 130
+    finally:
+        if isinstance(adapter, HSRRobotSkillInterface):
+            adapter.close()
 
 
 if __name__ == '__main__':

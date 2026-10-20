@@ -12,3 +12,6 @@ ros2_ws/log/
 logs/
 *.tar
 *.tar.gz
+
+# Lab-specific robot profiles (may contain private network/deployment details).
+config/*.local.yaml

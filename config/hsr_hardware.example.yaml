@@ -1,0 +1,17 @@
+# COPY outside Git, verify every value against the specific HSR and keep disabled
+# until reviewed by the lab operator. Source limits alone are insufficient.
+environment: hardware
+verified: false
+verification_note: ''
+controller_manager: /controller_manager
+controller: /head_trajectory_controller
+joint_states: /joint_states
+use_sim_time: false
+limits:
+  head_pan_joint: {min: -0.3, max: 0.3, velocity: 0.15, acceleration: 0.25}
+  head_tilt_joint: {min: -0.25, max: 0.25, velocity: 0.15, acceleration: 0.25}
+# Add person only after measuring its yaw/pitch; not live perception.
+targets: {front: [0.0, 0.0]}
+max_duration: 40
+state_timeout: 0.5
+connection_timeout: 8.0

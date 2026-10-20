@@ -6,12 +6,12 @@ from .behavior import validate_behavior
 
 
 def record_history(path, instruction, generated, feedback=None, updated=None, *, executed=False,
-                   backend='offline'):
+                   backend='offline', adapter='mock'):
     event = {'timestamp': datetime.now(timezone.utc).isoformat(),
              'instruction': instruction, 'generated_behavior': validate_behavior(generated),
              'human_feedback': feedback,
              'updated_behavior': validate_behavior(updated) if updated is not None else None,
-             'executed': executed, 'backend': backend, 'adapter': 'mock'}
+             'executed': executed, 'backend': backend, 'adapter': adapter}
     target = Path(path).expanduser()
     target.parent.mkdir(parents=True, exist_ok=True)
     with target.open('a', encoding='utf-8') as stream:

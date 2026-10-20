@@ -1,0 +1,18 @@
+# Two-joint ros2_control test rig; NOT the full Gazebo HSR simulator.
+# Endpoints: TeamSOBITS/hsrb_simulator jazzy a4eca087da629b8448fbc2a9adb3227e274f8288.
+# This profile is only for a simulator. Do not point it at a physical robot.
+environment: simulator
+verified: true
+verification_note: Source-confirmed JTC; GenEM tests use a two-joint ros2_control GenericSystem.
+controller_manager: /controller_manager
+controller: /head_trajectory_controller
+joint_states: /joint_states
+use_sim_time: false
+limits:
+  head_pan_joint: {min: -0.5, max: 0.5, velocity: 0.25, acceleration: 0.4}
+  head_tilt_joint: {min: -0.3, max: 0.3, velocity: 0.25, acceleration: 0.4}
+# Static demonstration coordinates, NOT detected/tracked people.
+targets: {front: [0.0, 0.0], person: [0.0, 0.0]}
+max_duration: 60
+state_timeout: 1.0
+connection_timeout: 8.0

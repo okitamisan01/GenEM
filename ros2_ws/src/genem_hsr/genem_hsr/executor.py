@@ -10,7 +10,7 @@ class BehaviorExecutor:
     def execute(self, behavior, *, hardware_confirmed=False):
         plan = validate_behavior(behavior)
         if isinstance(self.adapter, HSRRobotSkillInterface):
-            raise HardwareDisabledError('HSR execution disabled even with confirmation')
+            return self.adapter.execute_behavior(plan, hardware_confirmed=hardware_confirmed)
         for step in plan['behavior']['sequence']:
             getattr(self.adapter, step['skill'])(**step['parameters'])
         return plan

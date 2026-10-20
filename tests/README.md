@@ -8,3 +8,10 @@
 
 No real API key, external model call or robot is used by these checks.
 See `docs/validation.md` for observed results.
+
+## Real ROS controller integration
+
+`bash tests/verify_ros2_head.sh` starts the packaged two-joint ros2_control test rig
+in an ephemeral `--network none` container. It checks Action completion, joint-state
+excursions/final positions, cancellation after broadcaster loss, and CLI confirmation
+with simulator history. It cannot reach a physical robot. This is not full Gazebo HSR.

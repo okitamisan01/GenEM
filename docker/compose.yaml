@@ -7,6 +7,7 @@ services:
       dockerfile: docker/Dockerfile
     network_mode: host
     environment:
+      RMW_IMPLEMENTATION: ${RMW_IMPLEMENTATION:-rmw_fastrtps_cpp}
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-42}
       ROS_AUTOMATIC_DISCOVERY_RANGE: ${ROS_AUTOMATIC_DISCOVERY_RANGE:-LOCALHOST}
       GENEM_API_KEY: ${GENEM_API_KEY:-}
@@ -14,6 +15,7 @@ services:
       GENEM_MODEL: ${GENEM_MODEL:-}
     volumes:
       - ../ros2_ws/src:/root/colcon_ws/src
+      - ../config:/root/genem_config:ro
       - ../logs:/root/genem_logs
     stdin_open: true
     tty: true
