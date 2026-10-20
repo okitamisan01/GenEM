@@ -13,3 +13,6 @@ logs
 config/*.local.yaml
 
 .venv
+
+config/*.local.xml
+docker/*.local.env

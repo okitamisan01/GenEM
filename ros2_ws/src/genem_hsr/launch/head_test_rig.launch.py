@@ -13,7 +13,7 @@ def generate_launch_description():
         Node(package='robot_state_publisher', executable='robot_state_publisher',
              parameters=[{'robot_description': description}]),
         Node(package='controller_manager', executable='ros2_control_node',
-             parameters=[config], output='screen'),
+             parameters=[config], remappings=[('~/robot_description', '/robot_description')], output='screen'),
         Node(package='controller_manager', executable='spawner',
              arguments=['joint_state_broadcaster', '--controller-manager-timeout', '30']),
         Node(package='controller_manager', executable='spawner',

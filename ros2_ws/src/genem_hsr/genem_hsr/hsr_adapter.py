@@ -27,6 +27,7 @@ class HSRRobotSkillInterface(RobotSkillInterface):
         try:
             import rclpy
             from rclpy.context import Context
+            from rclpy.utilities import get_rmw_implementation_identifier
             from rclpy.executors import SingleThreadedExecutor
             from rclpy.signals import SignalHandlerOptions
             from rclpy.parameter import Parameter
@@ -39,27 +40,37 @@ class HSRRobotSkillInterface(RobotSkillInterface):
         except ImportError as exc:
             raise HardwareDisabledError('ROS control dependencies missing; rebuild the Docker image') from exc
         self.ros = rclpy
-        self.context = Context()
-        rclpy.init(context=self.context, signal_handler_options=SignalHandlerOptions.NO)
-        self.node = rclpy.create_node(
-            f'genem_head_adapter_{os.getpid()}', context=self.context,
-            parameter_overrides=[Parameter('use_sim_time', value=self.profile.use_sim_time)])
-        self.executor = SingleThreadedExecutor(context=self.context)
-        self.executor.add_node(self.node)
-        self.action_type = FollowJointTrajectory
-        self.hardware_type = ListHardwareComponents
-        self.list_type = ListControllers
-        self.params_type = GetParameters
-        self.subscription = self.node.create_subscription(
-            JointState, self.profile.joint_states, self._joint_state, qos_profile_sensor_data)
-        self.action = ActionClient(self.node, FollowJointTrajectory, self.profile.action_name)
-        self.controllers = self.node.create_client(
-            ListControllers, self.profile.controller_manager.rstrip('/') + '/list_controllers')
-        self.hardware = self.node.create_client(
-            ListHardwareComponents, self.profile.controller_manager.rstrip('/') + '/list_hardware_components')
-        self.parameters = self.node.create_client(
-            GetParameters, self.profile.controller.rstrip('/') + '/get_parameters')
-        self._initialized = True
+        try:
+            self.context = Context()
+            rclpy.init(context=self.context, signal_handler_options=SignalHandlerOptions.NO)
+            self.node = rclpy.create_node(
+                f'genem_head_adapter_{os.getpid()}', context=self.context,
+                parameter_overrides=[Parameter('use_sim_time', value=self.profile.use_sim_time)])
+            self.executor = SingleThreadedExecutor(context=self.context)
+            self.executor.add_node(self.node)
+            self.rmw_identifier = get_rmw_implementation_identifier()
+            self.action_type = FollowJointTrajectory
+            self.hardware_type = ListHardwareComponents
+            self.list_type = ListControllers
+            self.params_type = GetParameters
+            self.subscription = self.node.create_subscription(
+                JointState, self.profile.joint_states, self._joint_state, qos_profile_sensor_data)
+            self.action = ActionClient(self.node, FollowJointTrajectory, self.profile.action_name)
+            self.controllers = self.node.create_client(
+                ListControllers, self.profile.controller_manager.rstrip('/') + '/list_controllers')
+            self.hardware = self.node.create_client(
+                ListHardwareComponents, self.profile.controller_manager.rstrip('/') + '/list_hardware_components')
+            self.parameters = self.node.create_client(
+                GetParameters, self.profile.controller.rstrip('/') + '/get_parameters')
+            self._initialized = True
+        except Exception as exc:
+            if hasattr(self, 'node'):
+                self.node.destroy_node()
+            if hasattr(self, 'context') and self.context.ok():
+                self.context.shutdown()
+            raise HardwareDisabledError(
+                'ROS initialization failed; check the RMW installation, DDS XML, '
+                'network interface and ROS distribution') from exc
 
     def _joint_state(self, msg):
         try:
@@ -149,7 +160,9 @@ class HSRRobotSkillInterface(RobotSkillInterface):
         """Read-only: no goal is sent, including for an unverified hardware profile."""
         self._check_controller()
         positions = self._current()
-        return {'environment': self.profile.environment, 'action': self.profile.action_name,
+        return {'environment': self.profile.environment, 'ros_distribution': os.environ.get('ROS_DISTRO'),
+                'configured_domain_id': os.environ.get('ROS_DOMAIN_ID', '0'),
+                'rmw': self.rmw_identifier, 'action': self.profile.action_name,
                 'joint_states': self.profile.joint_states, 'joints': list(JOINTS),
                 'positions': list(positions), 'profile_verified': self.profile.verified,
                 'use_sim_time': self.profile.use_sim_time}

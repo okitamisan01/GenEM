@@ -1,0 +1,15 @@
+# Dedicated Humble client. Never changes the original Jazzy service/project.
+name: genem-hsr104
+services:
+  genem:
+    image: genem-hsr:humble
+    build:
+      args:
+        ROS_IMAGE: ros:humble-ros-base-jammy@sha256:566b87e6dfc48392189a9c32e594e84060fa9948de93b04e536f39475a1f6963
+        ROS_DISTRO: humble
+    environment:
+      ROS_DOMAIN_ID: ${GENEM_HSR_DOMAIN_ID:-104}
+      ROS_AUTOMATIC_DISCOVERY_RANGE: SUBNET
+      RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
+      ROS_LOCALHOST_ONLY: '0'
+      CYCLONEDDS_URI: file:///root/genem_config/cyclonedds.local.xml

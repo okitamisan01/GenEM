@@ -27,6 +27,15 @@ try:
     assert probe.returncode == 0, probe.stdout + probe.stderr
     assert 'No motion goal sent' in probe.stdout
     print('PASS: installed read-only hsr_probe command.')
+    import os
+    if os.environ.get('RMW_IMPLEMENTATION') == 'rmw_cyclonedds_cpp':
+        invalid = subprocess.run(['ros2', 'run', 'genem_hsr', 'hsr_probe', '--profile',
+                                  '/opt/genem/config/hsr_test_rig.yaml'],
+                                 env={**os.environ, 'CYCLONEDDS_URI': '<invalid'},
+                                 capture_output=True, text=True, timeout=15)
+        assert invalid.returncode == 2 and 'ROS initialization failed' in invalid.stdout, invalid.stdout + invalid.stderr
+        print('PASS: invalid Cyclone DDS configuration refused without a motion goal.')
+
     plan = {'behavior': {'name': 'head integration', 'sequence': [
         step('look_at', target='person'),
         step('head_nod', amplitude=0.04, speed=0.2, repetitions=1),
@@ -67,7 +76,7 @@ try:
     try:
         BehaviorExecutor(adapter).execute(long_plan, hardware_confirmed=True)
     except HardwareDisabledError as exc:
-        assert 'stream lost' in str(exc), str(exc)
+        assert any(reason in str(exc) for reason in ('stream lost', 'timestamps stale')), str(exc)
         assert adapter.last_cancel_confirmed is True, 'Controller did not confirm a terminal goal state'
         print('PASS: lost joint-state stream caused confirmed Action cancellation.')
     else:

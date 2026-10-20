@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run from any directory after docker/build.sh; needs no API credentials or robot.
 set -euo pipefail
-docker run --rm --network none genem-hsr:jazzy bash -c '
+docker run --rm --network none -e RMW_IMPLEMENTATION="${GENEM_RMW:-rmw_fastrtps_cpp}" "${GENEM_IMAGE:-genem-hsr:jazzy}" bash -c '
 set -e
 cd /root/colcon_ws
 colcon build --symlink-install
